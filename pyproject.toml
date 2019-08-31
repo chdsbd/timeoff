@@ -8,6 +8,7 @@ authors = ["Christopher Dignam <chris@dignam.xyz>"]
 python = "^3.7"
 ipython = "^7.6"
 pdfrw = "^0.4.0"
+click = "^7.0"
 
 [tool.poetry.dev-dependencies]
 

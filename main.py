@@ -1,57 +1,54 @@
-
-data_dict = dict(employee_name='Christopher Dignam', employee_signature='~~Chris',requested_dates='2019-07-23', manager_name='Brad', manager_approval='**Brad')
-
-
 import os
+
+import click
 import pdfrw
 
-
-INVOICE_TEMPLATE_PATH = 'form.pdf'
-INVOICE_OUTPUT_PATH = 'form-filled.pdf'
-
-
-ANNOT_KEY = '/Annots'
-ANNOT_FIELD_KEY = '/T'
-ANNOT_VAL_KEY = '/V'
-ANNOT_RECT_KEY = '/Rect'
-SUBTYPE_KEY = '/Subtype'
-WIDGET_SUBTYPE_KEY = '/Widget'
+ANNOT_KEY = "/Annots"
+ANNOT_FIELD_KEY = "/T"
+ANNOT_VAL_KEY = "/V"
+ANNOT_RECT_KEY = "/Rect"
+SUBTYPE_KEY = "/Subtype"
+WIDGET_SUBTYPE_KEY = "/Widget"
 
 
-def write_fillable_pdf(input_pdf_path, output_pdf_path, data_dict):
-    template_pdf = pdfrw.PdfReader(input_pdf_path)
+@click.command()
+@click.option(
+    "--input-path", type=click.Path(exists=True, dir_okay=False), required=True
+)
+@click.option("--output-path", type=click.Path(), required=True)
+@click.option("--employee-name", required=True)
+@click.option("--employee-signature", required=True)
+@click.option("--employee-requested-dates", required=True)
+@click.option("--manager-name", required=True)
+@click.option("--manager-signature", required=True)
+def write_fillable_pdf(
+    input_path,
+    output_path,
+    employee_name,
+    employee_signature,
+    employee_requested_dates,
+    manager_name,
+    manager_signature,
+):
+    template_pdf = pdfrw.PdfReader(input_path)
     annotations = template_pdf.pages[0][ANNOT_KEY]
+    data = dict(
+        employee_name=employee_name,
+        employee_signature=employee_signature,
+        requested_dates=employee_requested_dates,
+        manager_name=manager_name,
+        manager_approval=manager_signature,
+    )
     for annotation in annotations:
         if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
             if annotation[ANNOT_FIELD_KEY]:
                 key = annotation[ANNOT_FIELD_KEY][1:-1]
-                if key in data_dict.keys():
-                    annotation.update(
-                        pdfrw.PdfDict(V='{}'.format(data_dict[key]))
-                    )
-    pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
+                if key in data.keys():
+                    annotation.update(pdfrw.PdfDict(V="{}".format(data[key])))
+
+    pdfrw.PdfWriter().write(output_path, template_pdf)
+    click.launch(output_path, locate=True)
 
 
-# data_dict = {
-#    'business_name_1': 'Bostata',
-#    'customer_name': 'company.io',
-#    'customer_email': 'joe@company.io',
-#    'invoice_number': '102394',
-#    'send_date': '2018-02-13',
-#    'due_date': '2018-03-13',
-#    'note_contents': 'Thank you for your business, Joe',
-#    'item_1': 'Data consulting services',
-#    'item_1_quantity': '10 hours',
-#    'item_1_price': '$200/hr',
-#    'item_1_amount': '$2000',
-#    'subtotal': '$2000',
-#    'tax': '0',
-#    'discounts': '0',
-#    'total': '$2000',
-#    'business_name_2': 'Bostata LLC',
-#    'business_email_address': 'hi@bostata.com',
-#    'business_phone_number': '(617) 930-4294'
-# }
-
-if __name__ == '__main__':
-    write_fillable_pdf(INVOICE_TEMPLATE_PATH, INVOICE_OUTPUT_PATH, data_dict)
+if __name__ == "__main__":
+    write_fillable_pdf()
