@@ -31,7 +31,6 @@ def write_fillable_pdf(
     manager_signature,
 ):
     template_pdf = pdfrw.PdfReader(input_path)
-    annotations = template_pdf.pages[0][ANNOT_KEY]
     data = dict(
         employee_name=employee_name,
         employee_signature=employee_signature,
@@ -39,6 +38,7 @@ def write_fillable_pdf(
         manager_name=manager_name,
         manager_approval=manager_signature,
     )
+    annotations = template_pdf.pages[0][ANNOT_KEY]
     for annotation in annotations:
         if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
             if annotation[ANNOT_FIELD_KEY]:
