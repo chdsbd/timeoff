@@ -1,6 +1,10 @@
-# time off form
+# time off
 
-Automate the filling of time off request forms
+This bot isn't really useful for anyone besides employees at AdmitHub.
+
+This bot is triggered by a slash command `/timeoff`, which opens a Slack dialog
+to get data to fill into the PDF form. Some Python code fills in a PDF and
+uploads it to the channel.
 
 
 ## dev
@@ -41,4 +45,7 @@ poetry run zappa deploy dev
 
 # redeploy an environment
 poetry run zappa update dev
+
+# view logs
+poetry run zappa tail dev
 ```
