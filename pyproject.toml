@@ -12,6 +12,7 @@ click = "^7.0"
 aiohttp = "^3.5"
 slackclient = "^2.1"
 reportlab = "^3.5"
+python-dotenv = "^0.10.3"
 
 [tool.poetry.dev-dependencies]
 ipdb = "^0.12.2"

@@ -10,16 +10,17 @@ import aiohttp
 import click
 import slack
 from aiohttp import web
+from dotenv import load_dotenv
+
 from timeoff.pdf_generation import write_fillable_pdf
 
-client = slack.WebClient(
-    token="xoxp-12297453989-12301604098-746836518567-1c6489104570ae27b72f06dad970350d",
-    run_async=True,
-)
+load_dotenv()
 
-ADMITHUB_VACATION_CALENDAR = (
-    "admithub.com_jrflp74s0m5q1puh8n4qcu1lrg@group.calendar.google.com"
-)
+SLACK_TOKEN = os.environ["SLACK_TOKEN"]
+ADMITHUB_VACATION_CALENDAR = os.environ["ADMITHUB_VACATION_CALENDAR"]
+PORT = int(os.environ["PORT"])
+
+client = slack.WebClient(token=SLACK_TOKEN, run_async=True)
 
 
 async def root(request: web.Request) -> web.Response:
@@ -128,4 +129,4 @@ app.add_routes([web.get("/", root), web.post("/slack/{request_kind}", slack_hand
 
 
 if __name__ == "__main__":
-    web.run_app(app, port=int(os.getenv("PORT", 5555)))
+    web.run_app(app, port=PORT)
