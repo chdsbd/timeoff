@@ -11,7 +11,6 @@ poetry install
 
 
 poetry run python main.py  --input-path form.pdf \
-    --output-path form-filled-$(date -u +"%Y-%m-%dT%H:%M:%SZ").pdf \
     --employee-name 'Christopher Dignam' \
     --employee-signature '~~Chris' \
     --employee-requested-dates '2019-08-16 to 2019-08-20' \
