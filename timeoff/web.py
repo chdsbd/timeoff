@@ -18,7 +18,7 @@ load_dotenv()
 
 SLACK_TOKEN = os.environ["SLACK_TOKEN"]
 ADMITHUB_VACATION_CALENDAR = os.environ["ADMITHUB_VACATION_CALENDAR"]
-PORT = int(os.environ["PORT"])
+PORT = int(os.getenv("PORT", 5555))
 
 client = slack.WebClient(token=SLACK_TOKEN, run_async=True)
 
