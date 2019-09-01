@@ -1,6 +1,10 @@
-# time off form
+# time off
 
-Automate the filling of time off request forms
+This bot isn't really useful for anyone besides employees at AdmitHub.
+
+This bot is triggered by a slash command `/timeoff`, which opens a Slack dialog
+to get data to fill into the PDF form. Some Python code fills in a PDF and
+uploads it to the channel.
 
 
 ## dev
@@ -24,4 +28,24 @@ poetry run python -m timeoff.pdf_generation \
 
 # start the slack bot web server
 poetry run python -m timeoff.web
+```
+
+## deployment
+Deployment uses zappa which is a wrapper around AWS Lambda. See the [Zappa
+documentation](https://github.com/Miserlou/Zappa) for info on setting up an
+environment.
+
+When you first deploy you'll get a health check error because we need to
+configure the environment variables for the lambda function to include the app
+token.
+
+```bash
+# setup an environment for the first time
+poetry run zappa deploy dev
+
+# redeploy an environment
+poetry run zappa update dev
+
+# view logs
+poetry run zappa tail dev
 ```

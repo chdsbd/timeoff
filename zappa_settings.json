@@ -1,0 +1,28 @@
+{
+    "exclude": ["mypy*"],
+    "dev": {
+        "app_function": "timeoff.web.app",
+        "aws_region": "us-east-1",
+        "profile_name": "admin",
+        "project_name": "timeoff",
+        "runtime": "python3.7",
+        "exclude": ["mypy*"],
+        "s3_bucket": "zappa-1iqg1afyi"
+    },
+    "dev_sa_east_1": {
+        "aws_region": "sa-east-1",
+        "extends": "dev"
+    },
+    "dev_us_east_2": {
+        "aws_region": "us-east-2",
+        "extends": "dev"
+    },
+    "dev_us_west_1": {
+        "aws_region": "us-west-1",
+        "extends": "dev"
+    },
+    "dev_us_west_2": {
+        "aws_region": "us-west-2",
+        "extends": "dev"
+    }
+}
