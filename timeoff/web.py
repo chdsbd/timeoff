@@ -83,10 +83,13 @@ def get_calender_reminder_blocks(fullname: str) -> List[dict]:
 def slack_handler(request_kind: Optional[str] = None):
     if request_kind == "slash-command":
         res = client.users_info(user=request.form["user_id"])
+        assert res["ok"]
         real_name = res["user"]["real_name"]
-        client.dialog_open(
+        res = client.dialog_open(
             dialog=get_dialog(real_name), trigger_id=request.form["trigger_id"]
         )
+        assert res["ok"]
+
     if request_kind == "interaction":
         payload: dict = json.loads(request.form["payload"])
         user_id = payload["user"]["id"]
@@ -118,6 +121,7 @@ def slack_handler(request_kind: Optional[str] = None):
             user=user_id,
             blocks=get_calender_reminder_blocks(employee_name),
         )
+        assert res["ok"]
 
     return ""
 
