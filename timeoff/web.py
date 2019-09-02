@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import urllib
 from typing import List, Optional
 
@@ -12,6 +13,7 @@ from timeoff.pdf_generation import write_fillable_pdf
 load_dotenv()
 
 SLACK_TOKEN = os.environ["SLACK_TOKEN"]
+SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
 ADMITHUB_VACATION_CALENDAR = os.environ["ADMITHUB_VACATION_CALENDAR"]
 PORT = int(os.getenv("PORT", 5555))
 
@@ -81,6 +83,25 @@ def get_calender_reminder_blocks(fullname: str) -> List[dict]:
 
 @app.route("/slack/<request_kind>", methods=["POST"])
 def slack_handler(request_kind: Optional[str] = None):
+    # https://api.slack.com/docs/verifying-requests-from-slack
+    # https://github.com/slackapi/python-slackclient/blob/863e1d35b167a18561abbcdceaf7598c34c0366d/slack/web/base_client.py
+    raw_data = request.get_data().decode()
+    slack_request_timestamp = request.headers["X-Slack-Request-Timestamp"]
+    slack_signature = request.headers["X-Slack-Signature"]
+
+    if abs(time.time() - int(slack_request_timestamp)) > 60 * 5:
+        # The request timestamp is more than five minutes from local time.
+        # It could be a replay attack, so let's ignore it.
+        return ""
+    valid_signature = slack.WebClient.validate_slack_signature(
+        signing_secret=SLACK_SIGNING_SECRET,
+        data=raw_data,
+        timestamp=slack_request_timestamp,
+        signature=slack_signature,
+    )
+    if not valid_signature:
+        return ""
+
     if request_kind == "slash-command":
         res = client.users_info(user=request.form["user_id"])
         assert res["ok"]
