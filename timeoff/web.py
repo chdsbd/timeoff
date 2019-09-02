@@ -99,6 +99,16 @@ def slack_handler(request_kind: Optional[str] = None):
         employee_requested_dates = submission["employee_requested_dates"]
         manager_id = submission["manager"]
 
+        if manager_id == user_id:
+            return {
+                "errors": [
+                    {
+                        "name": "manager",
+                        "error": "You can't choose yourself! Please pick another option.",
+                    }
+                ]
+            }
+
         path = write_fillable_pdf(
             "form.pdf", employee_name, employee_signature, employee_requested_dates
         )
