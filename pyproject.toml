@@ -18,3 +18,4 @@ flask = "^1.1"
 [tool.poetry.dev-dependencies]
 ipdb = "^0.12.2"
 mypy = "^0.720.0"
+flake8 = "^3.7"

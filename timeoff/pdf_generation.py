@@ -1,15 +1,10 @@
-import io
-import json
 import os
 import tempfile
-from pathlib import Path
-from time import time
 from typing import Optional
-from uuid import uuid4
 
 import click
 import pdfrw
-from pdfrw import PageMerge, PdfReader, PdfWriter
+from pdfrw import PageMerge, PdfReader
 from reportlab.pdfgen import canvas
 
 WIDGET_SUBTYPE_KEY = "/Widget"
@@ -77,11 +72,10 @@ def write_fillable_pdf(
     # Warning: fontRes not available
     # Warning: Error during font loading: Font Cour is not available
     # ```
-    d = io.BytesIO()
     temporary_pdf_name = get_temp_pdf()
     pdf = canvas.Canvas(temporary_pdf_name)
 
-    first_page = annotations = template_pdf.pages[0]
+    first_page = template_pdf.pages[0]
     # AcroForm filling modified from https://bostata.com/how-to-populate-fillable-pdfs-with-python/
     for annotation in first_page.Annots:
         if annotation.Subtype != WIDGET_SUBTYPE_KEY:
