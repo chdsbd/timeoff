@@ -1,14 +1,12 @@
 import json
 import os
 import urllib
-from pathlib import Path
-from time import time
 from typing import List, Optional
 
-import click
 import slack
 from dotenv import load_dotenv
 from flask import Flask, request
+
 from timeoff.pdf_generation import write_fillable_pdf
 
 load_dotenv()
@@ -55,6 +53,12 @@ def get_dialog(fullname: str) -> dict:
                 "hint": "Write something unique to act as a signature (e.g. ~~Deloris).",
                 "name": "employee_signature",
             },
+            {
+                "type": "select",
+                "label": "Manager",
+                "name": "manager",
+                "data_source": "users",
+            },
         ],
     }
 
@@ -78,37 +82,39 @@ def get_calender_reminder_blocks(fullname: str) -> List[dict]:
 @app.route("/slack/<request_kind>", methods=["POST"])
 def slack_handler(request_kind: Optional[str] = None):
     if request_kind == "slash-command":
-        res = client.users_profile_get(user=request.form["user_id"])
-        real_name = res["profile"]["real_name"]
+        res = client.users_info(user=request.form["user_id"])
+        real_name = res["user"]["real_name"]
         client.dialog_open(
             dialog=get_dialog(real_name), trigger_id=request.form["trigger_id"]
         )
     if request_kind == "interaction":
         payload: dict = json.loads(request.form["payload"])
-        response_url = payload["response_url"]
-        channel_id = payload["channel"]["id"]
         user_id = payload["user"]["id"]
         submission = payload["submission"]
         employee_name = submission["employee_name"]
         employee_signature = submission["employee_signature"]
         employee_requested_dates = submission["employee_requested_dates"]
+        manager_id = submission["manager"]
 
-        # run PDF generation in thread pool for good measure
         path = write_fillable_pdf(
             "form.pdf", employee_name, employee_signature, employee_requested_dates
         )
+        res = client.conversations_open(users=[user_id, manager_id])
+        assert res["ok"]
+        conversation_channel_id = res["channel"]["id"]
 
         filename = f"Time off request for {employee_name}.pdf"
         res = client.files_upload(
             file=path,
             filename=filename,
-            channels=channel_id,
-            initial_comment="Here's a request for time off.",
+            channels=conversation_channel_id,
+            initial_comment=f"Here's a time off request for {employee_name}.",
         )
+        assert res["ok"]
 
         # send reminder about updating vacation calendar
         client.chat_postEphemeral(
-            channel=channel_id,
+            channel=conversation_channel_id,
             user=user_id,
             blocks=get_calender_reminder_blocks(employee_name),
         )
